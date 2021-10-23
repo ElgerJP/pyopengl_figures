@@ -5,22 +5,29 @@ from OpenGL.GLUT import *
 from OpenGL.GL import *
 from OpenGL.GLU import *
 
-from ponto import Ponto
-from figura import FigureConstructor
+from point import Point
+from figure import FigureConstructor
 from utilities import find_figure_idx
 from globals import *
 
 
-def display():
+def display() -> None:
+    """
+    Function that handles the display of the coordinates and the figures
+    """
     glClear(GL_COLOR_BUFFER_BIT)
 
     displayCoordinates()
     displayFigures()
 
-    glFlush()
+    glFinish()
 
 
+# R10
 def displayCoordinates() -> None:
+    """
+    Function that handles the generation of the coordinates
+    """
     MAX = 1
 
     glEnable(GL_BLEND)
@@ -47,7 +54,12 @@ def displayCoordinates() -> None:
     glEnd()
 
 
+# R5
 def displayFigures() -> None:
+    """
+    Function that handles the display of the figures and the geometric transformatioms.
+    The figures are drawn in the order they were added to the list, with colors defined by the figure type.
+    """
     for figure in MAIN_FIGURE_LIST:
         glEnable(GL_BLEND)
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
@@ -61,36 +73,46 @@ def displayFigures() -> None:
         glMultMatrixf(figure.figReflex)
 
         glBegin(GL_POLYGON)
-        for ponto in figure.pointsList:
-            glVertex2f(*ponto())
+        for point in figure.pointsList:
+            glVertex2f(*point())
 
         glEnd()
         glPopMatrix()
 
 
+# R1, R4
 def LockedFigureMenu(option: int) -> int:
+    """
+    Function that handles the menu for the creation of the regular geometric figures.
+
+    Args:
+        option (int): Option selected by the user.
+
+    Returns:
+        int: 0 when the function is called.
+    """
     os.system("cls")
-    print("Criando Figura Pré-Definida")
+    print("Creating Locked Figure")
     if option == 0:
-        figSize = float(input("Insira o tamanho da aresta: "))
-        posX = float(input("Insira a posicao inicial em X: "))
-        posY = float(input("Insira a posicao inicial em Y: "))
+        figSize = float(input("Insert the size of the edge of the triangle: "))
+        posX = float(input("Insert the top vertice of the figure in X: "))
+        posY = float(input("Insert the top vertice of the figure in Y: "))
 
         triangle = FigureConstructor.createTriangle(figSize, posX, posY)
         MAIN_FIGURE_LIST.append(triangle)
 
     elif option == 1:
-        figSize = float(input("Insira o tamanho da aresta: "))
-        posX = float(input("Insira a posicao inicial em X: "))
-        posY = float(input("Insira a posicao inicial em Y: "))
+        figSize = float(input("Insert the size of the edge of the square: "))
+        posX = float(input("Insert the center position of the figure in X: "))
+        posY = float(input("Insert the center position of the figure in Y: "))
 
         square = FigureConstructor.createSquare(figSize, posX, posY)
         MAIN_FIGURE_LIST.append(square)
 
     elif option == 2:
-        figSize = float(input("Insira o tamanho da aresta: "))
-        posX = float(input("Insira a posicao inicial em X: "))
-        posY = float(input("Insira a posicao inicial em Y: "))
+        figSize = float(input("Insert the size of the edge of the hexagon: "))
+        posX = float(input("Insert the center position of the figure in X: "))
+        posY = float(input("Insert the center position of the figure in Y: "))
 
         hexagon = FigureConstructor.createHexagon(figSize, posX, posY)
         MAIN_FIGURE_LIST.append(hexagon)
@@ -100,25 +122,36 @@ def LockedFigureMenu(option: int) -> int:
     return 0
 
 
+# R2, R3
 def FreeDrawMenu(option: int) -> int:
+    """
+
+    Function that handles the menu for the creation of the irregular geometric figures.
+
+    Args:
+        option (int): Option selected by the user.
+
+    Returns:
+        int: 0 when the function is called.
+    """
     global QTD_CLICKS
     os.system("cls")
-    print("Desenho Livre")
+    print("Free Draw Mode")
     if option == 0:
         MOUSE_POINTS.clear()
-        print("Selecionando Pontos")
-        QTD_CLICKS = int(input("Quantos pontos você deseja utilizar? "))
+        print("Selecting Points")
+        QTD_CLICKS = int(input("How many points would you like to add? "))
         MOUSE_POINTS.clear()
-        print("Pressione o botão do meio para cancelar")
+        print("Press the middle button to cancel the placement\n")
 
     elif option == 1:
-        print("Digitar Pontos")
+        print("Inserting Points Manually")
         points = []
         while True:
-            posX = float(input("Insira a posicao inicial em X: "))
-            posY = float(input("Insira a posicao inicial em Y: "))
+            posX = float(input("Insert the X for the point: "))
+            posY = float(input("Insert the Y for the point: "))
 
-            points.append(Ponto(posX, posY))
+            points.append(Point(posX, posY))
 
             continuar = input("Deseja continuar? [S/N]")
             if continuar.lower() == "s":
@@ -132,32 +165,45 @@ def FreeDrawMenu(option: int) -> int:
     return 0
 
 
+# R6
 def EditorMenu(option: int) -> int:
+    """
+    Function that handles the menu for the edition or removal of the figures.
+
+    Args:
+        option (int): Option selected by the user.
+
+    Raises:
+        ValueError: Error when the figure is not found.
+
+    Returns:
+        int: 0 when the function is called.
+    """
     os.system("cls")
-    print("Editar/Remover Figuras\n")
+    print("Edit/Delete Figures\n")
     for figure in MAIN_FIGURE_LIST:
         print(figure)
 
-    id = int(input("Escolha a figura que deseja editar/remover: "))
+    id = int(input("Select the ID of the figure you want to Edit/Delete "))
     idx = find_figure_idx(id)
     if idx != -1:
         figure = MAIN_FIGURE_LIST[idx]
     else:
-        raise ValueError("ID não existente")
+        raise ValueError("ID not found!")
 
     os.system("cls")
-    print(f"Alterando: {figure}")
+    print(f"Selected: {figure}")
 
     if option == 0:
-        posX = float(input("Escolha a coordenada X para transladar: "))
-        posY = float(input("Escolha a coordenada Y para transladar: "))
+        posX = float(input("X coordinate to translate: "))
+        posY = float(input("Y coordinate to translate: "))
         figure.figPos = (posX, posY, 0)
     elif option == 1:
-        scaleX = float(input("Escolha a escala X para editar: "))
-        scaleY = float(input("Escolha a escala Y para editar: "))
+        scaleX = float(input("X proportion to scale: "))
+        scaleY = float(input("Y proportion to scale: "))
         figure.figScale = (scaleX, scaleY, 1)
     elif option == 2:
-        axis = input("Eixo de Reflexão [X|Y]: ")
+        axis = input("Select the Reflection Axis [X|Y]: ")
         figReflex = np.identity(4)
         if axis.lower() == "x":
             figReflex[1][1] = -1
@@ -166,13 +212,13 @@ def EditorMenu(option: int) -> int:
             figReflex[0][0] = -1
             figure.figReflex = figReflex
         else:
-            print("Opção inválida!")
+            print("Invalid Option")
     elif option == 3:
-        angle = float(input("Angulo de Rotação: "))
+        angle = float(input("Rotation Angle: "))
         figure.figRot = angle
     elif option == 4:
-        axis = input("Eixo de Cisalhamento [X|Y]: ")
-        shear_value = float(input("Valor de Cisalhamento: "))
+        axis = input("Select the axis for shearing [X|Y]: ")
+        shear_value = float(input("Value for shearing: "))
         figShear = np.identity(4)
 
         if axis.lower() == "x":
@@ -182,64 +228,84 @@ def EditorMenu(option: int) -> int:
             figShear[0][1] = shear_value
             figure.figShear = figShear
         else:
-            print("Opção inválida!")
+            print("Invalid Option!")
     elif option == 5:
         MAIN_FIGURE_LIST.pop(idx)
-        print(f"Figura {id} removida!")
+        print(f"Figure {id} removed!")
 
     glutPostRedisplay()
 
     return 0
 
 
-def MenuMain(**kwargs) -> int:
+def MainMenu(**kwargs) -> int:
+    """
+    Wrapper function for the main menu.
+
+    Returns:
+        int: 0 when the function is called.
+    """
     return 0
 
 
-def CriaMenuFlutuante() -> None:
+# R11
+def CreateMenu() -> None:
+    """
+    Function that handles the creation of the floating menu, that contains all other menus.
+
+    """
     menu_free_draw = glutCreateMenu(FreeDrawMenu)
-    glutAddMenuEntry("Selecionar Pontos", 0)
-    glutAddMenuEntry("Fixar Pontos", 1)
+    glutAddMenuEntry("Select Points", 0)
+    glutAddMenuEntry("Add Points Manually", 1)
 
     menu_locked_draw = glutCreateMenu(LockedFigureMenu)
-    glutAddMenuEntry("Triangulo", 0)
-    glutAddMenuEntry("Quadrado", 1)
-    glutAddMenuEntry("Hexagono", 2)
+    glutAddMenuEntry("Triangle", 0)
+    glutAddMenuEntry("Square", 1)
+    glutAddMenuEntry("Hexagon", 2)
 
     menu_editor = glutCreateMenu(EditorMenu)
-    glutAddMenuEntry("Translacao", 0)
-    glutAddMenuEntry("Escala", 1)
-    glutAddMenuEntry("Reflexao", 2)
-    glutAddMenuEntry("Rotacao", 3)
-    glutAddMenuEntry("Cisalhamento", 4)
-    glutAddMenuEntry("Apagar Figura", 5)
+    glutAddMenuEntry("Translate", 0)
+    glutAddMenuEntry("Scale", 1)
+    glutAddMenuEntry("Reflect", 2)
+    glutAddMenuEntry("Rotate", 3)
+    glutAddMenuEntry("Shear", 4)
+    glutAddMenuEntry("Delete Figure", 5)
 
-    menu = glutCreateMenu(MenuMain)
-    glutAddSubMenu("Desenho Livre", menu_free_draw)
-    glutAddSubMenu("Figuras Pre-Definidas", menu_locked_draw)
-    glutAddSubMenu("Editar Figuras", menu_editor)
+    menu = glutCreateMenu(MainMenu)
+    glutAddSubMenu("Free Drawing", menu_free_draw)
+    glutAddSubMenu("Locked Figures", menu_locked_draw)
+    glutAddSubMenu("Edit/Delete Figures", menu_editor)
 
     glutAttachMenu(GLUT_RIGHT_BUTTON)
 
 
 def MouseManager(button: int, state: int, x: int, y: int) -> None:
+    """
+    Function that handles the mouse events.
+
+    Args:
+        button (int): Button pressed.
+        state (int): State of the button.
+        x (int): X coordinate of the mouse.
+        y (int): Y coordinate of the mouse.
+    """
     global QTD_CLICKS
 
     if button == GLUT_RIGHT_BUTTON:
         if state == GLUT_DOWN:
-            CriaMenuFlutuante()
+            CreateMenu()
 
     if button == GLUT_LEFT_BUTTON:
         if state == GLUT_DOWN:
             posX = (x - WINDOW_WIDTH / 2) / 250
             posY = -(y - WINDOW_HEIGHT / 2) / 250
-            print(Ponto(posX, posY))
+            print(Point(posX, posY))
             if QTD_CLICKS:
-                MOUSE_POINTS.append(Ponto(posX, posY))
+                MOUSE_POINTS.append(Point(posX, posY))
             if (len(MOUSE_POINTS) == QTD_CLICKS) and bool(QTD_CLICKS):
                 irregular = FigureConstructor.createIrregular(MOUSE_POINTS.copy())
                 MAIN_FIGURE_LIST.append(irregular)
-                print(f"Inserido: {MAIN_FIGURE_LIST[-1]}")
+                print(f"Inserted: {MAIN_FIGURE_LIST[-1]}")
                 MOUSE_POINTS.clear()
                 QTD_CLICKS = 0
 
@@ -247,17 +313,20 @@ def MouseManager(button: int, state: int, x: int, y: int) -> None:
         if state == GLUT_DOWN:
             QTD_CLICKS = 0
             if len(MOUSE_POINTS) and not QTD_CLICKS:
-                print("Seleção de pontos cancelada!")
+                print("Points selection canceled!")
                 MOUSE_POINTS.clear()
 
 
 def main(*args, **kwargs):
+    """
+    Main funtion of the program.
+    """
     os.system("cls")
     glutInit()
     glutInitDisplayMode(GLUT_SINGLE | GLUT_DEPTH | GLUT_RGBA)
     glutInitWindowSize(WINDOW_WIDTH, WINDOW_HEIGHT)
     glutInitWindowPosition(0, 0)
-    glutCreateWindow("Atividade 1 - Computacao Grafica")
+    glutCreateWindow("OpenGL - Figures")
 
     glutDisplayFunc(display)
     glutMouseFunc(MouseManager)
