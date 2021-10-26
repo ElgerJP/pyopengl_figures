@@ -41,11 +41,11 @@ class Figure:
         for new_point in new_points:
             if new_point > max_range:
                 raise ValueError(
-                    f"Possui ponto ({new_point}) fora do máximo permitido ({max_range})"
+                    f"Point ({new_point}) is out of the allowed limits ({max_range})"
                 )
             for figure in MAIN_FIGURE_LIST:
                 if new_point in figure.pointsList:
-                    raise ValueError(f"Possui ponto duplicado {new_point}")
+                    raise ValueError(f"Duplicated Points on {new_point}")
 
         return super(Figure, cls).__new__(cls)
 
